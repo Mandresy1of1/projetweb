@@ -1,26 +1,58 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import DatePicker from "react-datepicker";
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Form, Button } from 'react-bootstrap';
 
 function UpdatePossession() {
-  const { libelle } = useParams();
-  const [dateFin, setDateFin] = useState(new Date());
+  const [libelle, setLibelle] = useState('');
+  const [dateFin, setDateFin] = useState('');
+  const { libelle: libelleParam } = useParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchPossession = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/possession/${libelleParam}`);
+        const data = await response.json();
+        setLibelle(data.libelle);
+        setDateFin(data.dateFin || '');
+      } catch (error) {
+        console.error('Error fetching possession:', error);
+      }
+    };
+
+    fetchPossession();
+  }, [libelleParam]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await fetch(`http://localhost:5000/possession/${libelle}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dateFin })
-    });
+
+    try {
+      await fetch(`http://localhost:5000/possession/${libelleParam}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ libelle, dateFin }),
+      });
+      navigate('/');
+    } catch (error) {
+      console.error('Error updating possession:', error);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Edit Possession: {libelle}</h2>
-      <DatePicker selected={dateFin} onChange={date => setDateFin(date)} />
-      <button type="submit">Update</button>
-    </form>
+    <div>
+      <h2>Update Possession</h2>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group controlId="formLibelle">
+          <Form.Label>Libellé</Form.Label>
+          <Form.Control type="text" value={libelle} readOnly />
+        </Form.Group>
+        <Form.Group controlId="formDateFin">
+          <Form.Label>Date Fin</Form.Label>
+          <Form.Control type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
+        </Form.Group>
+        <Button variant="primary" type="submit">Update</Button>
+      </Form>
+    </div>
   );
 }
 

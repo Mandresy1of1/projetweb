@@ -1,0 +1,35 @@
+/* App.css */
+body {
+    background-color: #f8f9fa;
+  }
+  
+  .container {
+    margin-top: 20px;
+  }
+  
+  .navbar {
+    margin-bottom: 20px;
+  }
+  
+  .table {
+    margin-top: 20px;
+  }
+  
+  .table th,
+  .table td {
+    text-align: center;
+  }
+  
+  .chart-container {
+    margin-top: 20px;
+  }
+  
+  .chart-container h3 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .control {
+    width: 150px;
+  }
+  

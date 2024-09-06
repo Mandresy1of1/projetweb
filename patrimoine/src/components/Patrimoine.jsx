@@ -2,6 +2,9 @@ import { useState } from 'react';
 import DatePicker from "react-datepicker";
 import { Line } from 'react-chartjs-2';
 import 'react-datepicker/dist/react-datepicker.css';
+import { Chart as ChartJS, LineElement, CategoryScale, LinearScale, Title, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(LineElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
 function Patrimoine() {
   const [dateDebut, setDateDebut] = useState(new Date());
