@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Form, Button, Container } from 'react-bootstrap';
+import { Form, Button, Container, Alert } from 'react-bootstrap';
+import PossessionContext from './PossessionContext';
 
 function UpdatePossession() {
-  const { libelle } = useParams(); // Obtenir le libelle de la route
-  const [possession, setPossession] = useState(null);
+  const { libelle } = useParams();
+  const { fetchPossessions } = useContext(PossessionContext);
   const [formData, setFormData] = useState({
     libelle: '',
     valeur: '',
@@ -14,6 +15,8 @@ function UpdatePossession() {
     valeurConstante: '',
     jour: ''
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,19 +27,20 @@ function UpdatePossession() {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        setPossession(data);
-        // Pré-remplir le formulaire avec les données existantes
         setFormData({
           libelle: data.libelle,
           valeur: data.valeur,
-          dateDebut: data.dateDebut.split('T')[0], // Convertir en format YYYY-MM-DD
+          dateDebut: data.dateDebut ? data.dateDebut.split('T')[0] : '',
           dateFin: data.dateFin ? data.dateFin.split('T')[0] : '',
           tauxAmortissement: data.tauxAmortissement,
           valeurConstante: data.valeurConstante || '',
           jour: data.jour || ''
         });
       } catch (error) {
+        setError('Failed to fetch possession details');
         console.error('Fetch error:', error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchPossession();
@@ -56,18 +60,33 @@ function UpdatePossession() {
       await fetch(`http://localhost:5000/possession/${libelle}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          dateDebut: new Date(formData.dateDebut).toISOString(),
+          dateFin: formData.dateFin ? new Date(formData.dateFin).toISOString() : null,
+          valeur: parseFloat(formData.valeur),
+          tauxAmortissement: parseFloat(formData.tauxAmortissement),
+          valeurConstante: parseFloat(formData.valeurConstante),
+          jour: formData.jour
+        })
       });
-      navigate('/possession'); // Rediriger après la mise à jour
+      fetchPossessions(); // Rafraîchir les données dans le contexte
+      navigate('/possession'); // Redirige vers la liste après la mise à jour
     } catch (error) {
+      setError('Failed to update possession');
       console.error('Update error:', error);
     }
   };
 
+  if (loading) {
+    return <Container className="mt-4"><p>Loading...</p></Container>;
+  }
+
   return (
     <Container className="mt-4">
       <h2>Update Possession</h2>
-      {possession && (
+      {error && <Alert variant="danger">{error}</Alert>}
+      {formData && (
         <Form onSubmit={handleSubmit}>
           <Form.Group controlId="formLibelle">
             <Form.Label>Libellé</Form.Label>
@@ -77,7 +96,8 @@ function UpdatePossession() {
               value={formData.libelle}
               onChange={handleChange}
               placeholder="Libellé"
-              readOnly
+              required
+             
             />
           </Form.Group>
           <Form.Group controlId="formValeur">
@@ -88,6 +108,8 @@ function UpdatePossession() {
               value={formData.valeur}
               onChange={handleChange}
               placeholder="Valeur"
+              min="0"
+              required
             />
           </Form.Group>
           <Form.Group controlId="formDateDebut">
@@ -97,6 +119,7 @@ function UpdatePossession() {
               name="dateDebut"
               value={formData.dateDebut}
               onChange={handleChange}
+              required
             />
           </Form.Group>
           <Form.Group controlId="formDateFin">
@@ -109,13 +132,16 @@ function UpdatePossession() {
             />
           </Form.Group>
           <Form.Group controlId="formTaux">
-            <Form.Label>Taux d'Amortissement (%)</Form.Label>
+            <Form.Label>Taux</Form.Label>
             <Form.Control
               type="number"
               name="tauxAmortissement"
               value={formData.tauxAmortissement}
               onChange={handleChange}
               placeholder="Taux d'Amortissement"
+              min="0"
+              step="0.01"
+              required
             />
           </Form.Group>
           <Form.Group controlId="formValeurConstante">
@@ -126,6 +152,7 @@ function UpdatePossession() {
               value={formData.valeurConstante}
               onChange={handleChange}
               placeholder="Valeur Constante"
+              min="0"
             />
           </Form.Group>
           <Form.Group controlId="formJour">
@@ -138,7 +165,7 @@ function UpdatePossession() {
               placeholder="Jour"
             />
           </Form.Group>
-          <Button variant="primary" type="submit">Update</Button>
+          <Button variant="primary" type="submit" className="mt-3">Update</Button>
         </Form>
       )}
     </Container>

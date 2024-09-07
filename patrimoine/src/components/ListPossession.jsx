@@ -1,31 +1,15 @@
-import { useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Table, Container } from 'react-bootstrap';
+import PossessionContext from './PossessionContext';
 
 function ListPossession() {
-  const [possessions, setPossessions] = useState([]);
-
-  useEffect(() => {
-    const fetchPossessions = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/possession');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        console.log("Data received from API:", data);
-        setPossessions(data.possessions); // Assurez-vous que `data.possessions` est la structure correcte
-      } catch (error) {
-        console.error('Fetch error:', error);
-      }
-    };
-    fetchPossessions();
-  }, []);
+  const { possessions, fetchPossessions } = useContext(PossessionContext);
 
   const handleClose = async (libelle) => {
     try {
       await fetch(`http://localhost:5000/possession/${libelle}/close`, { method: 'POST' });
-      setPossessions(possessions.filter(possession => possession.libelle !== libelle));
+      fetchPossessions(); // Rafraîchir les données après fermeture
     } catch (error) {
       console.error('Close error:', error);
     }
@@ -34,7 +18,7 @@ function ListPossession() {
   const handleDelete = async (libelle) => {
     try {
       await fetch(`http://localhost:5000/possession/${libelle}`, { method: 'DELETE' });
-      setPossessions(possessions.filter(possession => possession.libelle !== libelle));
+      fetchPossessions(); // Rafraîchir les données après suppression
     } catch (error) {
       console.error('Delete error:', error);
     }

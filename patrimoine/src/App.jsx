@@ -108,10 +108,8 @@ function App() {
 
         <div className="main-content">
           <Routes>
-            {/* Route pour afficher la liste des possessions */}
+            <Route path="/" element={<div>Welcome to the Home Page</div>} />
             <Route path="/tableau" element={<ListPossession possessions={possessions} />} />
-
-            {/* Route pour afficher le graphique de valeur des possessions */}
             <Route path="/graphique" element={
               <div className="chart-container">
                 <h3>Graphique de Valeur des Possessions</h3>
@@ -131,11 +129,7 @@ function App() {
                 <Line data={chartData} />
               </div>
             } />
-
-            {/* Route pour créer une nouvelle possession */}
             <Route path="/possession/create" element={<CreatePossession />} />
-
-            {/* Route pour mettre à jour une possession existante */}
             <Route path="/possession/:libelle/update" element={<UpdatePossession />} />
           </Routes>
         </div>

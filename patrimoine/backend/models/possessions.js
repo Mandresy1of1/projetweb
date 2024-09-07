@@ -3,59 +3,57 @@ export const possessions = [
     {
       possesseur: { nom: "John Doe" },
       libelle: "MacBook Pro",
-      valeur: 4000000,
+      valeur: 4300000,
       dateDebut: "2023-12-25T00:00:00.000Z",
       dateFin: null,
       tauxAmortissement: 5
     },
     {
       possesseur: { nom: "John Doe" },
-      libelle: "Alternance",
-      valeur: 0,
-      dateDebut: "2022-12-31T21:00:00.000Z",
+      libelle: "Compte épargne",
+      valeur: 500000,
+      dateDebut: "2023-12-25T00:00:00.000Z",
       dateFin: null,
-      tauxAmortissement: 0,
-      jour: 1,
-      valeurConstante: 500000
+      tauxAmortissement: -5,
+    
     },
     {
       possesseur: { nom: "John Doe" },
-      libelle: "Survie",
-      valeur: 0,
+      libelle: "Clothes",
+      valeur: 2000000,
       dateDebut: "2022-12-31T21:00:00.000Z",
       dateFin: null,
-      tauxAmortissement: 0,
-      jour: 2,
-      valeurConstante: -300000
+      tauxAmortissement: 10
     },
  
     {
       possesseur: { nom: "John Doe" },
-      libelle: "MacBook Pro",
-      valeur: 4000000,
-      dateDebut: "2023-12-25T00:00:00.000Z",
-      dateFin: null,
-      tauxAmortissement: 5
-    },
-    {
-      possesseur: { nom: "John Doe" },
       libelle: "Alternance",
-      valeur: 0,
-      dateDebut: "2022-12-31T21:00:00.000Z",
+      valeur: 600000,
+      dateDebut: "2023-02-13T00:00:00.000Z",
       dateFin: null,
       tauxAmortissement: 0,
       jour: 1,
-      valeurConstante: 500000
+      valeurConstante: 600000
     },
     {
       possesseur: { nom: "John Doe" },
       libelle: "Survie",
-      valeur: 0,
-      dateDebut: "2022-12-31T21:00:00.000Z",
+      valeur: 300000,
+      dateDebut: "2023-02-13T21:00:00.000Z",
       dateFin: null,
       tauxAmortissement: 0,
       jour: 2,
       valeurConstante: -300000
+    },
+    {
+      possesseur: { nom: "John Doe" },
+      libelle: "Redmi Note 9",
+      valeur: 800000,
+      dateDebut: "2022-12-29T21:00:00.000Z",
+      dateFin: null,
+      tauxAmortissement: 15,
+     
     }
   ];
   

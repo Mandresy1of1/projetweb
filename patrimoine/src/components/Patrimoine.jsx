@@ -16,7 +16,11 @@ function Patrimoine() {
     const response = await fetch('/patrimoine/range', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dateDebut, dateFin, jour })
+      body: JSON.stringify({ 
+        dateDebut: dateDebut.toISOString(), 
+        dateFin: dateFin.toISOString(), 
+        jour: parseInt(jour, 10) 
+      })
     });
     const data = await response.json();
     setChartData({
@@ -35,7 +39,12 @@ function Patrimoine() {
       <div className="mb-3">
         <DatePicker selected={dateDebut} onChange={date => setDateDebut(date)} />
         <DatePicker selected={dateFin} onChange={date => setDateFin(date)} />
-        <input type="number" value={jour} onChange={e => setJour(e.target.value)} />
+        <input 
+          type="number" 
+          value={jour} 
+          onChange={e => setJour(e.target.value)} 
+          placeholder="Jour" 
+        />
         <button onClick={handleValidateRange}>Validate</button>
       </div>
       <Line data={chartData} />

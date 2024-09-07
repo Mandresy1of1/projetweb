@@ -1,9 +1,13 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client'; // Importez createRoot depuis react-dom/client
+import App from './App';
+import { PossessionProvider } from './components/PossessionContext';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const root = ReactDOM.createRoot(document.getElementById('root')); // Créez le root avec createRoot
+root.render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+    <PossessionProvider>
+      <App />
+    </PossessionProvider>
+  </React.StrictMode>
+);
