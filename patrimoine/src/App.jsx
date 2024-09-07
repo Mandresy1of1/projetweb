@@ -25,12 +25,12 @@ function App() {
   useEffect(() => {
     const fetchPossessions = async () => {
       try {
-        const response = await fetch("http://localhost:5000/possession");
+        const response = await fetch("http://localhost:8000/possession"); // Ensure this matches your server URL
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        setPossessions(data.possessions || []);
+        setPossessions(data || []);
       } catch (error) {
         console.error('Fetch error:', error);
       }
@@ -109,7 +109,7 @@ function App() {
         <div className="main-content">
           <Routes>
             <Route path="/" element={<div>Welcome to the Home Page</div>} />
-            <Route path="/tableau" element={<ListPossession possessions={possessions} />} />
+            <Route path="/tableau" element={<ListPossession />} />
             <Route path="/graphique" element={
               <div className="chart-container">
                 <h3>Graphique de Valeur des Possessions</h3>

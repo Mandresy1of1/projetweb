@@ -1,14 +1,28 @@
-import React, { useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Table, Container } from 'react-bootstrap';
-import PossessionContext from './PossessionContext';
+import axios from 'axios';
 
 function ListPossession() {
-  const { possessions, fetchPossessions } = useContext(PossessionContext);
+  const [possessions, setPossessions] = useState([]);
+
+  // Fonction pour récupérer les possessions depuis l'API
+  const fetchPossessions = async () => {
+    try {
+      const res = await axios.get('http://localhost:8000/possession');
+      setPossessions(res.data);
+    } catch (error) {
+      console.error('Error fetching possessions:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPossessions();
+  }, []);
 
   const handleClose = async (libelle) => {
     try {
-      await fetch(`http://localhost:5000/possession/${libelle}/close`, { method: 'POST' });
+      await axios.post(`http://localhost:8000/possession/${libelle}/close`);
       fetchPossessions(); // Rafraîchir les données après fermeture
     } catch (error) {
       console.error('Close error:', error);
@@ -17,7 +31,7 @@ function ListPossession() {
 
   const handleDelete = async (libelle) => {
     try {
-      await fetch(`http://localhost:5000/possession/${libelle}`, { method: 'DELETE' });
+      await axios.delete(`http://localhost:8000/possession/${libelle}`);
       fetchPossessions(); // Rafraîchir les données après suppression
     } catch (error) {
       console.error('Delete error:', error);

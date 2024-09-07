@@ -7,7 +7,7 @@ export function PossessionProvider({ children }) {
 
   const fetchPossessions = async () => {
     try {
-      const response = await fetch('http://localhost:5000/possession');
+      const response = await fetch('http://localhost:8000/possession');
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
