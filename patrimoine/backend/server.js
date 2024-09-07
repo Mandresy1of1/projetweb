@@ -40,23 +40,28 @@ app.post('/possession', (req, res) => {
 });
 
 app.put('/possession/:libelle', (req, res) => {
-  const { libelle } = req.params;
-  const { dateFin } = req.body;
-
-  console.log('Requête PUT reçue:', req.body);
-
-  const index = possessions.findIndex(p => p.libelle === decodeURIComponent(libelle));
-  console.log('Index trouvé:', index);
-
-  if (index !== -1) {
-    possessions[index].dateFin = dateFin;
-    console.log('Possession mise à jour:', possessions[index]);
-    res.json(possessions[index]);
-  } else {
-    console.log('Possession non trouvée pour:', libelle);
-    res.status(404).json({ error: 'Possession not found' });
-  }
-});
+    const { libelle } = req.params;
+    const updatedData = req.body;
+  
+    // Recherche de la possession par l'ancien libelle
+    const possession = possessions.find(p => p.libelle === libelle);
+  
+    if (possession) {
+      // Mise à jour de la possession avec les nouvelles données
+      possession.libelle = updatedData.libelle || possession.libelle;
+      possession.valeur = updatedData.valeur;
+      possession.dateDebut = updatedData.dateDebut;
+      possession.dateFin = updatedData.dateFin;
+      possession.tauxAmortissement = updatedData.tauxAmortissement;
+      possession.valeurConstante = updatedData.valeurConstante;
+      possession.jour = updatedData.jour;
+  
+      res.json(possession);
+    } else {
+      res.status(404).json({ error: 'Possession not found' });
+    }
+  });
+  
 
 app.delete('/possession/:libelle', (req, res) => {
   const { libelle } = req.params;

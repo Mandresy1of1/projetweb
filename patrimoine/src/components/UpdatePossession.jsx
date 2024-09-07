@@ -54,6 +54,7 @@ function UpdatePossession() {
     });
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -70,13 +71,14 @@ function UpdatePossession() {
           jour: formData.jour
         })
       });
-      fetchPossessions(); // Refresh the data in context
-      navigate('/possession'); // Redirect to the list after update
+      fetchPossessions(); // Actualiser les données dans le contexte
+      navigate('/possession'); // Rediriger vers la liste après la mise à jour
     } catch (error) {
       setError('Failed to update possession');
       console.error('Update error:', error);
     }
   };
+  
 
   if (loading) {
     return <Container className="mt-4"><p>Loading...</p></Container>;
@@ -96,7 +98,7 @@ function UpdatePossession() {
             onChange={handleChange}
             placeholder="Libellé"
             required
-            readOnly // libelle is typically not editable
+          
           />
         </Form.Group>
         <Form.Group controlId="formValeur">
