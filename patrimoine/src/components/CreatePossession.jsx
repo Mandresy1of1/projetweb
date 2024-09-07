@@ -1,53 +1,32 @@
 import { useState } from 'react';
+import DatePicker from "react-datepicker";
 import { useNavigate } from 'react-router-dom';
-import { Form, Button } from 'react-bootstrap';
 
 function CreatePossession() {
   const [libelle, setLibelle] = useState('');
-  const [valeur, setValeur] = useState('');
-  const [dateDebut, setDateDebut] = useState('');
-  const [tauxAmortissement, setTauxAmortissement] = useState('');
+  const [valeur, setValeur] = useState(0);
+  const [dateDebut, setDateDebut] = useState(new Date());
+  const [taux, setTaux] = useState(0);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newPossession = { libelle, valeur, dateDebut, tauxAmortissement };
-
-    try {
-      await fetch('http://localhost:5000/possession', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newPossession),
-      });
-      navigate('/');
-    } catch (error) {
-      console.error('Error creating possession:', error);
-    }
+    await fetch('http://localhost:5000/possession', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ libelle, valeur, dateDebut, taux })
+    });
+    navigate('/tableau'); // Rediriger après la création
   };
 
   return (
-    <div>
-      <h2>Create Possession</h2>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group controlId="formLibelle">
-          <Form.Label>Libellé</Form.Label>
-          <Form.Control type="text" value={libelle} onChange={(e) => setLibelle(e.target.value)} required />
-        </Form.Group>
-        <Form.Group controlId="formValeur">
-          <Form.Label>Valeur</Form.Label>
-          <Form.Control type="number" value={valeur} onChange={(e) => setValeur(e.target.value)} required />
-        </Form.Group>
-        <Form.Group controlId="formDateDebut">
-          <Form.Label>Date Début</Form.Label>
-          <Form.Control type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} required />
-        </Form.Group>
-        <Form.Group controlId="formTauxAmortissement">
-          <Form.Label>Taux Amortissement</Form.Label>
-          <Form.Control type="number" value={tauxAmortissement} onChange={(e) => setTauxAmortissement(e.target.value)} />
-        </Form.Group>
-        <Button variant="primary" type="submit">Create</Button>
-      </Form>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <input type="text" value={libelle} onChange={e => setLibelle(e.target.value)} placeholder="Libellé" />
+      <input type="number" value={valeur} onChange={e => setValeur(e.target.value)} placeholder="Valeur" />
+      <DatePicker selected={dateDebut} onChange={date => setDateDebut(date)} />
+      <input type="number" value={taux} onChange={e => setTaux(e.target.value)} placeholder="Taux d'Amortissement" />
+      <button type="submit">Create</button>
+    </form>
   );
 }
 

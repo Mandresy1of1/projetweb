@@ -30,13 +30,17 @@ app.post('/possession', (req, res) => {
 
 app.put('/possession/:libelle', (req, res) => {
   const { libelle } = req.params;
+  console.log('Libelle reçu:', libelle); // Ajoute cette ligne pour déboguer
+
   const { dateFin } = req.body;
   const index = possessions.findIndex(p => p.libelle === libelle);
 
   if (index !== -1) {
     possessions[index].dateFin = dateFin;
+    console.log('Possession mise à jour:', possessions[index]); // Pour vérifier la mise à jour
     res.json(possessions[index]);
   } else {
+    console.log('Possession non trouvée pour:', libelle); // Pour voir pourquoi ça échoue
     res.status(404).json({ error: 'Possession not found' });
   }
 });

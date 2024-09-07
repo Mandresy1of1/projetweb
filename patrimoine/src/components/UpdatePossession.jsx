@@ -1,57 +1,145 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Button } from 'react-bootstrap';
+import { useParams, useNavigate } from 'react-router-dom';
 
 function UpdatePossession() {
-  const [libelle, setLibelle] = useState('');
-  const [dateFin, setDateFin] = useState('');
-  const { libelle: libelleParam } = useParams();
+  const { libelle } = useParams(); // Obtenir le libelle de la route
+  const [possession, setPossession] = useState(null);
+  const [formData, setFormData] = useState({
+    libelle: '',
+    valeur: '',
+    dateDebut: '',
+    dateFin: '',
+    tauxAmortissement: '',
+    valeurConstante: '',
+    jour: ''
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPossession = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/possession/${libelleParam}`);
+        const response = await fetch(`http://localhost:5000/possession/${libelle}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
         const data = await response.json();
-        setLibelle(data.libelle);
-        setDateFin(data.dateFin || '');
+        setPossession(data);
+        // Pré-remplir le formulaire avec les données existantes
+        setFormData({
+          libelle: data.libelle,
+          valeur: data.valeur,
+          dateDebut: data.dateDebut.split('T')[0], // Convertir en format YYYY-MM-DD
+          dateFin: data.dateFin ? data.dateFin.split('T')[0] : '',
+          tauxAmortissement: data.tauxAmortissement,
+          valeurConstante: data.valeurConstante || '',
+          jour: data.jour || ''
+        });
       } catch (error) {
-        console.error('Error fetching possession:', error);
+        console.error('Fetch error:', error);
       }
     };
-
     fetchPossession();
-  }, [libelleParam]);
+  }, [libelle]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      await fetch(`http://localhost:5000/possession/${libelleParam}`, {
+      const response = await fetch(`http://localhost:5000/possession/${formData.libelle}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ libelle, dateFin }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
       });
-      navigate('/');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      navigate('/tableau'); // Rediriger après la mise à jour
     } catch (error) {
-      console.error('Error updating possession:', error);
+      console.error('Update error:', error);
     }
   };
+
+  if (!possession) return <p>Loading...</p>;
 
   return (
     <div>
       <h2>Update Possession</h2>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group controlId="formLibelle">
-          <Form.Label>Libellé</Form.Label>
-          <Form.Control type="text" value={libelle} readOnly />
-        </Form.Group>
-        <Form.Group controlId="formDateFin">
-          <Form.Label>Date Fin</Form.Label>
-          <Form.Control type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
-        </Form.Group>
-        <Button variant="primary" type="submit">Update</Button>
-      </Form>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Libellé</label>
+          <input
+            type="text"
+            name="libelle"
+            value={formData.libelle}
+            onChange={handleChange}
+            disabled // Vous pouvez enlever l'attribut disabled si vous souhaitez permettre de modifier le libelle
+          />
+        </div>
+        <div>
+          <label>Valeur</label>
+          <input
+            type="number"
+            name="valeur"
+            value={formData.valeur}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Date Début</label>
+          <input
+            type="date"
+            name="dateDebut"
+            value={formData.dateDebut}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Date Fin</label>
+          <input
+            type="date"
+            name="dateFin"
+            value={formData.dateFin}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Taux d'Amortissement (%)</label>
+          <input
+            type="number"
+            name="tauxAmortissement"
+            value={formData.tauxAmortissement}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Valeur Constante</label>
+          <input
+            type="number"
+            name="valeurConstante"
+            value={formData.valeurConstante}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Jour</label>
+          <input
+            type="text"
+            name="jour"
+            value={formData.jour}
+            onChange={handleChange}
+          />
+        </div>
+        <button type="submit">Update</button>
+      </form>
     </div>
   );
 }
