@@ -3,33 +3,28 @@ import cors from 'cors';
 import moment from 'moment';
 import data from './data.json' assert { type: 'json' };
 import bodyParser from 'body-parser';
-import { v4 as uuidv4 } from 'uuid';
 
 const app = express();
 const port = 8000;
 
-// Middleware pour gérer les requêtes JSON
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: 'http://127.0.0.1:5173', // URL du front-end
+    origin: 'http://127.0.0.1:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   })
 );
 
-// Extrait les possessions du patrimoine depuis les données en mémoire
 const possessions = data.find(item => item.model === 'Patrimoine')?.data.possessions || [];
 
-// Route GET pour obtenir toutes les possessions
 app.get('/possession', (req, res) => {
   res.json(possessions);
 });
 
-// Route GET pour obtenir une possession spécifique par UUID
-app.get('/possession/:uuid', (req, res) => {
-  const { uuid } = req.params;
-  const possession = possessions.find(p => p.uuid === uuid);
+app.get('/possession/:libelle', (req, res) => {
+  const { libelle } = req.params;
+  const possession = possessions.find(p => p.libelle === decodeURIComponent(libelle));
   if (possession) {
     res.json(possession);
   } else {
@@ -37,51 +32,35 @@ app.get('/possession/:uuid', (req, res) => {
   }
 });
 
-// Route POST pour créer une nouvelle possession
 app.post('/possession', (req, res) => {
   const { possesseur, libelle, valeur, dateDebut, tauxAmortissement, dateFin, jour, valeurConstante } = req.body;
-  const newPossession = {
-    uuid: uuidv4(), // Génération d'un UUID
-    possesseur,
-    libelle,
-    valeur,
-    dateDebut,
-    tauxAmortissement,
-    dateFin,
-    jour,
-    valeurConstante
-  };
+  const newPossession = { possesseur, libelle, valeur, dateDebut, tauxAmortissement, dateFin, jour, valeurConstante };
   possessions.push(newPossession);
   res.status(201).json(newPossession);
 });
 
-// Route PUT pour mettre à jour une possession
-app.put('/possession/:uuid', (req, res) => {
-  const { uuid } = req.params;
-  const { dateFin, valeur, dateDebut } = req.body;
+app.put('/possession/:libelle', (req, res) => {
+  const { libelle } = req.params;
+  const { dateFin } = req.body;
 
-  console.log('Requête PUT reçue pour:', uuid);
-  console.log('Corps de la requête:', req.body);
+  console.log('Requête PUT reçue:', req.body);
 
-  const index = possessions.findIndex(p => p.uuid === uuid);
+  const index = possessions.findIndex(p => p.libelle === decodeURIComponent(libelle));
   console.log('Index trouvé:', index);
 
   if (index !== -1) {
-    possessions[index].dateFin = dateFin || possessions[index].dateFin;
-    possessions[index].valeur = valeur || possessions[index].valeur;
-    possessions[index].dateDebut = dateDebut || possessions[index].dateDebut;
+    possessions[index].dateFin = dateFin;
     console.log('Possession mise à jour:', possessions[index]);
     res.json(possessions[index]);
   } else {
-    console.log('Possession non trouvée pour:', uuid);
+    console.log('Possession non trouvée pour:', libelle);
     res.status(404).json({ error: 'Possession not found' });
   }
 });
 
-// Route DELETE pour supprimer une possession
-app.delete('/possession/:uuid', (req, res) => {
-  const { uuid } = req.params;
-  const index = possessions.findIndex(p => p.uuid === uuid);
+app.delete('/possession/:libelle', (req, res) => {
+  const { libelle } = req.params;
+  const index = possessions.findIndex(p => p.libelle === decodeURIComponent(libelle));
 
   if (index !== -1) {
     possessions.splice(index, 1);
@@ -91,7 +70,51 @@ app.delete('/possession/:uuid', (req, res) => {
   }
 });
 
-// Autres routes...
+const calculateValeurActuelle = (possession, dateActuelle) => {
+  const dateDebut = moment(possession.dateDebut);
+  let valeurActuelle = possession.valeur;
+
+  if (possession.tauxAmortissement > 0) {
+    const dureeUtilisee = dateActuelle.diff(dateDebut, 'years', true);
+    valeurActuelle -= (possession.tauxAmortissement / 100) * dureeUtilisee * possession.valeur;
+  } else if (possession.valeurConstante && possession.jour) {
+    const joursPasses = dateActuelle.diff(dateDebut, 'days');
+    const moisPasses = Math.floor(joursPasses / 30);
+    valeurActuelle = possession.valeurConstante * moisPasses;
+  }
+
+  return Math.max(valeurActuelle, 0);
+};
+
+app.get('/patrimoine/:date', (req, res) => {
+  const { date } = req.params;
+  const selectedDate = moment(date);
+  let totalValeur = 0;
+
+  possessions.forEach(possession => {
+    if (!possession.dateFin || moment(possession.dateFin).isAfter(selectedDate)) {
+      totalValeur += calculateValeurActuelle(possession, selectedDate);
+    }
+  });
+
+  res.json({ date, valeur: totalValeur });
+});
+
+app.post('/patrimoine/range', (req, res) => {
+  const { dateDebut, dateFin } = req.body;
+  const startDate = moment(dateDebut);
+  const endDate = moment(dateFin);
+  let totalValeur = 0;
+
+  possessions.forEach(possession => {
+    if (!possession.dateFin || moment(possession.dateFin).isAfter(endDate)) {
+      const currentValue = calculateValeurActuelle(possession, endDate);
+      totalValeur += currentValue;
+    }
+  });
+
+  res.json({ dateDebut, dateFin, valeur: totalValeur });
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
