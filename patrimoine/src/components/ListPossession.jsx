@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Button, Table, Container } from 'react-bootstrap';
 
 function ListPossession() {
   const [possessions, setPossessions] = useState([]);
@@ -40,11 +41,11 @@ function ListPossession() {
   };
 
   return (
-    <div>
+    <Container className="mt-4">
       <Link to="/create">
-        <button>Create Possession</button>
+        <Button variant="primary" className="mb-3">Create Possession</Button>
       </Link>
-      <table>
+      <Table striped bordered hover>
         <thead>
           <tr>
             <th>Libellé</th>
@@ -67,9 +68,11 @@ function ListPossession() {
                 <td>{possession.tauxAmortissement}%</td>
                 <td>{possession.valeurActuelle}</td>
                 <td>
-                  <Link to={`/possession/${encodeURIComponent(possession.libelle)}/update`}>Edit</Link>
-                  <button onClick={() => handleClose(possession.libelle)}>Close</button>
-                  <button onClick={() => handleDelete(possession.libelle)}>Delete</button>
+                  <Link to={`/possession/${encodeURIComponent(possession.libelle)}/update`}>
+                    <Button variant="warning" className="mr-2">Edit</Button>
+                  </Link>
+                  <Button variant="danger" onClick={() => handleClose(possession.libelle)} className="mr-2">Close</Button>
+                  <Button variant="danger" onClick={() => handleDelete(possession.libelle)}>Delete</Button>
                 </td>
               </tr>
             ))
@@ -79,8 +82,8 @@ function ListPossession() {
             </tr>
           )}
         </tbody>
-      </table>
-    </div>
+      </Table>
+    </Container>
   );
 }
 

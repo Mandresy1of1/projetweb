@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Form, Button, Container } from 'react-bootstrap';
 
 function UpdatePossession() {
   const { libelle } = useParams(); // Obtenir le libelle de la route
@@ -52,95 +53,95 @@ function UpdatePossession() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:5000/possession/${formData.libelle}`, {
+      await fetch(`http://localhost:5000/possession/${libelle}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      navigate('/tableau'); // Rediriger après la mise à jour
+      navigate('/possession'); // Rediriger après la mise à jour
     } catch (error) {
       console.error('Update error:', error);
     }
   };
 
-  if (!possession) return <p>Loading...</p>;
-
   return (
-    <div>
+    <Container className="mt-4">
       <h2>Update Possession</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Libellé</label>
-          <input
-            type="text"
-            name="libelle"
-            value={formData.libelle}
-            onChange={handleChange}
-            disabled // Vous pouvez enlever l'attribut disabled si vous souhaitez permettre de modifier le libelle
-          />
-        </div>
-        <div>
-          <label>Valeur</label>
-          <input
-            type="number"
-            name="valeur"
-            value={formData.valeur}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Date Début</label>
-          <input
-            type="date"
-            name="dateDebut"
-            value={formData.dateDebut}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Date Fin</label>
-          <input
-            type="date"
-            name="dateFin"
-            value={formData.dateFin}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Taux d'Amortissement (%)</label>
-          <input
-            type="number"
-            name="tauxAmortissement"
-            value={formData.tauxAmortissement}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Valeur Constante</label>
-          <input
-            type="number"
-            name="valeurConstante"
-            value={formData.valeurConstante}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Jour</label>
-          <input
-            type="text"
-            name="jour"
-            value={formData.jour}
-            onChange={handleChange}
-          />
-        </div>
-        <button type="submit">Update</button>
-      </form>
-    </div>
+      {possession && (
+        <Form onSubmit={handleSubmit}>
+          <Form.Group controlId="formLibelle">
+            <Form.Label>Libellé</Form.Label>
+            <Form.Control
+              type="text"
+              name="libelle"
+              value={formData.libelle}
+              onChange={handleChange}
+              placeholder="Libellé"
+              readOnly
+            />
+          </Form.Group>
+          <Form.Group controlId="formValeur">
+            <Form.Label>Valeur</Form.Label>
+            <Form.Control
+              type="number"
+              name="valeur"
+              value={formData.valeur}
+              onChange={handleChange}
+              placeholder="Valeur"
+            />
+          </Form.Group>
+          <Form.Group controlId="formDateDebut">
+            <Form.Label>Date Début</Form.Label>
+            <Form.Control
+              type="date"
+              name="dateDebut"
+              value={formData.dateDebut}
+              onChange={handleChange}
+            />
+          </Form.Group>
+          <Form.Group controlId="formDateFin">
+            <Form.Label>Date Fin</Form.Label>
+            <Form.Control
+              type="date"
+              name="dateFin"
+              value={formData.dateFin}
+              onChange={handleChange}
+            />
+          </Form.Group>
+          <Form.Group controlId="formTaux">
+            <Form.Label>Taux d'Amortissement (%)</Form.Label>
+            <Form.Control
+              type="number"
+              name="tauxAmortissement"
+              value={formData.tauxAmortissement}
+              onChange={handleChange}
+              placeholder="Taux d'Amortissement"
+            />
+          </Form.Group>
+          <Form.Group controlId="formValeurConstante">
+            <Form.Label>Valeur Constante</Form.Label>
+            <Form.Control
+              type="number"
+              name="valeurConstante"
+              value={formData.valeurConstante}
+              onChange={handleChange}
+              placeholder="Valeur Constante"
+            />
+          </Form.Group>
+          <Form.Group controlId="formJour">
+            <Form.Label>Jour</Form.Label>
+            <Form.Control
+              type="text"
+              name="jour"
+              value={formData.jour}
+              onChange={handleChange}
+              placeholder="Jour"
+            />
+          </Form.Group>
+          <Button variant="primary" type="submit">Update</Button>
+        </Form>
+      )}
+    </Container>
   );
 }
 
