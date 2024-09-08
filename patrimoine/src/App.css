@@ -32,4 +32,31 @@ body {
   .control {
     width: 150px;
   }
+  .date-single {
+    display: flex;
+    align-items: center;
+  }
+  
+  .date-single label {
+    margin-right: 10px;
+  }
+  
+  .date-single .control {
+    margin-right: 10px;
+  }
+  
+  .date-range {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espace entre les deux DatePickers */
+  }
+  
+  .date-range-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .date-range-item label {
+    margin-bottom: 5px;
+  }
   

@@ -16,8 +16,15 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 function App() {
   const [possessions, setPossessions] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [patrimoineValeur, setPatrimoineValeur] = useState(null);
-  const [chartData, setChartData] = useState({
+  const [dateDebut, setDateDebut] = useState(new Date());
+  const [dateFin, setDateFin] = useState(new Date());
+  const [patrimoineValeurDate, setPatrimoineValeurDate] = useState(null);
+  const [patrimoineValeurPlage, setPatrimoineValeurPlage] = useState(null);
+  const [chartDataDate, setChartDataDate] = useState({
+    labels: [],
+    datasets: []
+  });
+  const [chartDataRange, setChartDataRange] = useState({
     labels: [],
     datasets: []
   });
@@ -25,7 +32,7 @@ function App() {
   useEffect(() => {
     const fetchPossessions = async () => {
       try {
-        const response = await fetch("http://localhost:8000/possession"); // Ensure this matches your server URL
+        const response = await fetch("http://localhost:8000/possession");
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -69,29 +76,61 @@ function App() {
     });
 
     setPossessions(possessionsAvecValeurActuelle);
-    setPatrimoineValeur(totalValeur);
-    updateChart(possessionsAvecValeurActuelle); // Mise à jour des données du graphique
+    setPatrimoineValeurDate(totalValeur);
+    updateChart(possessionsAvecValeurActuelle, 'date');
   };
 
-  const updateChart = (possessions) => {
+  const calculerValeurPatrimoinePlage = (possessions, dateDebut, dateFin) => {
+    const possessionsAvecValeurActuelle = possessions.map(item => {
+      const valeurActuelle = calculerValeurActuelle(item, dateFin);
+      return { ...item, valeurActuelle };
+    });
+
+    setPossessions(possessionsAvecValeurActuelle);
+    const totalValeur = possessionsAvecValeurActuelle.reduce((acc, item) => acc + item.valeurActuelle, 0);
+    setPatrimoineValeurPlage(totalValeur);
+    updateChart(possessionsAvecValeurActuelle, 'range');
+  };
+
+  const updateChart = (possessions, type) => {
     const labels = possessions.map(p => p.libelle);
     const data = possessions.map(p => p.valeurActuelle);
 
-    setChartData({
-      labels,
-      datasets: [
-        {
-          label: 'Valeur des Possessions',
-          data,
-          borderColor: 'rgba(75, 192, 192, 1)',
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        }
-      ]
-    });
+    if (type === 'date') {
+      setChartDataDate({
+        labels,
+        datasets: [
+          {
+            label: 'Valeur des Possessions à la Date Spécifique',
+            data,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          }
+        ]
+      });
+    } else if (type === 'range') {
+      setChartDataRange({
+        labels,
+        datasets: [
+          {
+            label: 'Valeur des Possessions dans la Plage de Dates',
+            data,
+            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          }
+        ]
+      });
+    }
   };
 
   const handleValidation = () => {
-    calculerValeurPatrimoine(possessions, selectedDate); // Calculer lorsque le bouton est cliqué
+    calculerValeurPatrimoine(possessions, moment(selectedDate));
+  };
+
+  const handleValidateRange = () => {
+    if (dateDebut && dateFin) {
+      calculerValeurPatrimoinePlage(possessions, moment(dateDebut), moment(dateFin));
+    }
   };
 
   return (
@@ -113,8 +152,10 @@ function App() {
             <Route path="/graphique" element={
               <div className="chart-container">
                 <h3>Graphique de Valeur des Possessions</h3>
-                <div className="mt-3">
-                  <label className="ml-3">Date Fin</label>
+
+                {/* Date pour calculer la valeur */}
+                <div className="date-single mt-3">
+                  <label>Date</label>
                   <DatePicker
                     selected={selectedDate}
                     onChange={(date) => setSelectedDate(date)}
@@ -123,10 +164,47 @@ function App() {
                   />
                   <button className="btn btn-primary ml-2" onClick={handleValidation}>Valider</button>
                 </div>
-                {patrimoineValeur !== null && (
-                  <p className="mt-3">La valeur du patrimoine est : <strong>{patrimoineValeur.toFixed(2)}</strong></p>
+                {patrimoineValeurDate !== null && (
+                  <p className="mt-3">La valeur du patrimoine à la date sélectionnée est : <strong>{patrimoineValeurDate.toFixed(2)}</strong></p>
                 )}
-                <Line data={chartData} />
+
+                {/* Plage de dates */}
+                <div className="date-range mt-3">
+                  <div className="date-range-item">
+                    <label>Date Début</label>
+                    <DatePicker
+                      selected={dateDebut}
+                      onChange={(date) => setDateDebut(date)}
+                      dateFormat="yyyy-MM-dd"
+                      className="control ml-2"
+                    />
+                  </div>
+                  <div className="date-range-item">
+                    <label>Date Fin</label>
+                    <DatePicker
+                      selected={dateFin}
+                      onChange={(date) => setDateFin(date)}
+                      dateFormat="yyyy-MM-dd"
+                      className="control ml-2"
+                    />
+                  </div>
+                  <button className="btn btn-primary ml-2" onClick={handleValidateRange}>Valider Plage</button>
+                </div>
+                {patrimoineValeurPlage !== null && (
+                  <p className="mt-3">La valeur du patrimoine entre ces dates est : <strong>{patrimoineValeurPlage.toFixed(2)}</strong></p>
+                )}
+
+                {/* Graphique pour une date spécifique */}
+                <div className="chart-date mt-5">
+                  <h4>Valeur des Possessions à la Date Spécifique</h4>
+                  <Line data={chartDataDate} />
+                </div>
+
+                {/* Graphique pour la plage de dates */}
+                <div className="chart-range mt-5">
+                  <h4>Valeur des Possessions dans la Plage de Dates</h4>
+                  <Line data={chartDataRange} />
+                </div>
               </div>
             } />
             <Route path="/possession/create" element={<CreatePossession />} />
