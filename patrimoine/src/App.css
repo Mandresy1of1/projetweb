@@ -1,62 +1,90 @@
-/* App.css */
 body {
-    background-color: #f8f9fa;
-  }
-  
-  .container {
-    margin-top: 20px;
-  }
-  
-  .navbar {
-    margin-bottom: 20px;
-  }
-  
-  .table {
-    margin-top: 20px;
-  }
-  
-  .table th,
-  .table td {
-    text-align: center;
-  }
-  
-  .chart-container {
-    margin-top: 20px;
-  }
-  
-  .chart-container h3 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .control {
-    width: 150px;
-  }
-  .date-single {
-    display: flex;
-    align-items: center;
-  }
-  
-  .date-single label {
-    margin-right: 10px;
-  }
-  
-  .date-single .control {
-    margin-right: 10px;
-  }
-  
-  .date-range {
-    display: flex;
-    align-items: center;
-    gap: 15px; /* Espace entre les deux DatePickers */
-  }
-  
-  .date-range-item {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .date-range-item label {
-    margin-bottom: 5px;
-  }
-  
+  background-color: #f8f9fa;
+  font-family: Arial, sans-serif; /* Ajout d'une police pour une meilleure lisibilité */
+}
+
+.container {
+  margin-top: 20px;
+}
+
+.navbar {
+  margin-bottom: 20px;
+}
+
+.table {
+  margin-top: 20px;
+}
+
+.table th,
+.table td {
+  text-align: center;
+}
+
+.chart-container {
+  margin-top: 20px;
+}
+
+.chart-container h3 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.control {
+  width: 150px;
+}
+
+.date-single {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centrer les éléments horizontalement */
+  margin-bottom: 20px; /* Espacement sous le conteneur */
+}
+
+.date-single label {
+  margin-right: 10px;
+}
+
+.date-single .control {
+  margin-right: 10px;
+}
+
+.date-range {
+  display: flex;
+  justify-content: space-evenly; /* Espacement entre les deux DatePickers */
+  align-items: center;
+  margin-bottom: 25px; /* Espacement sous le conteneur */
+}
+
+.date-range-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Alignement des éléments au début */
+}
+
+.date-range-item label {
+  margin-bottom: 5px;
+}
+
+.date-range-item .control {
+  width: 150px; /* Réduit la largeur des DatePickers */
+}
+
+/* Style pour les graphiques */
+.chart-date,
+.chart-range {
+  width: 100%;
+  max-width: 600px; /* Largeur maximale des graphiques réduite */
+  margin: 20px auto;
+}
+
+.chart-date canvas,
+.chart-range canvas {
+  height: 250px; /* Hauteur des graphiques réduite */
+}
+
+
+
+.mt-3{
+  display: flex;
+  justify-content: center;
+}

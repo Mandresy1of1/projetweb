@@ -40,8 +40,8 @@ function ListPossession() {
 
   return (
     <Container className="mt-4">
-      <Link to="/create">
-        <Button variant="primary" className="mb-3">Create Possession</Button>
+      <Link to="/possession/create">
+        <Button variant="primary" className="mb-3">Nouvelle Possession</Button>
       </Link>
       <Table striped bordered hover>
         <thead>

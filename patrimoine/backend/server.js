@@ -5,19 +5,20 @@ import data from './data.json' assert { type: 'json' };
 import bodyParser from 'body-parser';
 
 const app = express();
-const port = 8000;
+const port = process.env.PORT || 8000;
 
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: 'http://127.0.0.1:5173',
+    origin: '*',  // Permettre toutes les origines; modifier si tu veux restreindre
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   })
 );
 
 const possessions = data.find(item => item.model === 'Patrimoine')?.data.possessions || [];
 
+// Endpoints pour gérer les possessions
 app.get('/possession', (req, res) => {
   res.json(possessions);
 });
@@ -40,28 +41,27 @@ app.post('/possession', (req, res) => {
 });
 
 app.put('/possession/:libelle', (req, res) => {
-    const { libelle } = req.params;
-    const updatedData = req.body;
-  
-    // Recherche de la possession par l'ancien libelle
-    const possession = possessions.find(p => p.libelle === libelle);
-  
-    if (possession) {
-      // Mise à jour de la possession avec les nouvelles données
-      possession.libelle = updatedData.libelle || possession.libelle;
-      possession.valeur = updatedData.valeur;
-      possession.dateDebut = updatedData.dateDebut;
-      possession.dateFin = updatedData.dateFin;
-      possession.tauxAmortissement = updatedData.tauxAmortissement;
-      possession.valeurConstante = updatedData.valeurConstante;
-      possession.jour = updatedData.jour;
-  
-      res.json(possession);
-    } else {
-      res.status(404).json({ error: 'Possession not found' });
-    }
-  });
-  
+  const { libelle } = req.params;
+  const updatedData = req.body;
+
+  // Recherche de la possession par l'ancien libelle
+  const possession = possessions.find(p => p.libelle === libelle);
+
+  if (possession) {
+    // Mise à jour de la possession avec les nouvelles données
+    possession.libelle = updatedData.libelle || possession.libelle;
+    possession.valeur = updatedData.valeur;
+    possession.dateDebut = updatedData.dateDebut;
+    possession.dateFin = updatedData.dateFin;
+    possession.tauxAmortissement = updatedData.tauxAmortissement;
+    possession.valeurConstante = updatedData.valeurConstante;
+    possession.jour = updatedData.jour;
+
+    res.json(possession);
+  } else {
+    res.status(404).json({ error: 'Possession not found' });
+  }
+});
 
 app.delete('/possession/:libelle', (req, res) => {
   const { libelle } = req.params;
@@ -75,6 +75,7 @@ app.delete('/possession/:libelle', (req, res) => {
   }
 });
 
+// Fonction pour calculer la valeur actuelle d'une possession
 const calculateValeurActuelle = (possession, dateActuelle) => {
   const dateDebut = moment(possession.dateDebut);
   let valeurActuelle = possession.valeur;
@@ -91,36 +92,33 @@ const calculateValeurActuelle = (possession, dateActuelle) => {
   return Math.max(valeurActuelle, 0);
 };
 
-app.get('/patrimoine/:date', (req, res) => {
-  const { date } = req.params;
-  const selectedDate = moment(date);
-  let totalValeur = 0;
+// Endpoint pour obtenir la valeur du patrimoine pour une plage de dates
+app.post('/patrimoine/ranges', (req, res) => {
+  const { dateRanges, jour } = req.body;
+  const result = [];
 
-  possessions.forEach(possession => {
-    if (!possession.dateFin || moment(possession.dateFin).isAfter(selectedDate)) {
-      totalValeur += calculateValeurActuelle(possession, selectedDate);
-    }
+  dateRanges.forEach(range => {
+    const startDate = moment(range.dateDebut);
+    const endDate = moment(range.dateFin);
+    let totalValeur = 0;
+
+    possessions.forEach(possession => {
+      if (!possession.dateFin || moment(possession.dateFin).isAfter(endDate)) {
+        const currentValue = calculateValeurActuelle(possession, endDate);
+        totalValeur += currentValue;
+      }
+    });
+
+    result.push({
+      dateDebut: startDate.format('YYYY-MM-DD'),
+      dateFin: endDate.format('YYYY-MM-DD'),
+      valeur: totalValeur
+    });
   });
 
-  res.json({ date, valeur: totalValeur });
+  res.json(result);
 });
 
-app.post('/patrimoine/range', (req, res) => {
-  const { dateDebut, dateFin } = req.body;
-  const startDate = moment(dateDebut);
-  const endDate = moment(dateFin);
-  let totalValeur = 0;
-
-  possessions.forEach(possession => {
-    if (!possession.dateFin || moment(possession.dateFin).isAfter(endDate)) {
-      const currentValue = calculateValeurActuelle(possession, endDate);
-      totalValeur += currentValue;
-    }
-  });
-
-  res.json({ dateDebut, dateFin, valeur: totalValeur });
-});
-
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);
 });
